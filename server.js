@@ -1,5 +1,7 @@
 var express = require('express');
 var app = express();
+app.set('views', './views');
+app.set('view engine', 'pug');
 
 var msAccKey = process.env.MS_ACC_KEY;
 
@@ -72,8 +74,5 @@ app.get('/api/latest/imagesearch', function(req, res) {
 
 app.get('/', function(req, res) {
     
-    var response = 'Search for images: ' + appUrl + 'lolcats%20funny?offset=10' + ' ... ' +
-                    'Recent search queries: ' + appUrl + 'api/latest/imagesearch';
-    
-    res.send(response);
+    res.render('index', { appUrl });
 });
