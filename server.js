@@ -9,27 +9,31 @@ var Bing = require('node-bing-api')({
 
 var port = process.env.PORT || 8080;
 
-// var MongoClient = require('mongodb').MongoClient;
-// var mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/image-search';
+var MongoClient = require('mongodb').MongoClient;
+var mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/image-search';
 
-// var collection;
+var collection;
 
-// MongoClient.connect(mongoUrl, function(err, db) {
-//     if (err) throw err;
+MongoClient.connect(mongoUrl, function(err, db) {
+    if (err) throw err;
 
-//     // collection = db.collection('latestSearches');
+    collection = db.collection('latestSearches');
 
-// });
+    app.listen(port, function() {
+        console.log('Listening on port ' + port);
+    });
+});
 
 app.get('/api/imagesearch/:term', function(req, res) {
     var term = req.params.term;
     var offset = req.query.offset || 0;
     var resultCount = 10;
+    var skipCount = offset * resultCount;
     var results;
 
     Bing.images(term, {
         top: resultCount,
-        skip: offset * resultCount
+        skip: skipCount
     }, function(error, response, body) {
         if (error) throw error;
 
@@ -50,12 +54,17 @@ app.get('/api/imagesearch/:term', function(req, res) {
         when: new Date().toISOString()
     };
 
+    collection.insertOne(searchData, function(err, result) {
+        if (err) throw err;
+    });
 });
 
 app.get('/api/latest', function(req, res) {
-    res.send(JSON.stringify('Test'));
-});
+    collection.find({}, {
+        _id: 0
+    }).toArray(function(err, docs) {
+        if (err) throw err;
 
-app.listen(port, function() {
-    console.log('Listening on port ' + port);
+        res.send(JSON.stringify(docs));
+    });
 });
