@@ -8,6 +8,7 @@ var Bing = require('node-bing-api')({
 });
 
 var port = process.env.PORT || 8080;
+var appUrl = process.env.APP_URL || '[APP URL]';
 
 var MongoClient = require('mongodb').MongoClient;
 var mongoUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/image-search';
@@ -51,7 +52,7 @@ app.get('/api/imagesearch/:term', function(req, res) {
 
     var searchData = {
         term: term,
-        when: new Date().toISOString()
+        when: new Date()
     };
 
     collection.insertOne(searchData, function(err, result) {
@@ -59,12 +60,20 @@ app.get('/api/imagesearch/:term', function(req, res) {
     });
 });
 
-app.get('/api/latest', function(req, res) {
+app.get('/api/latest/imagesearch', function(req, res) {
     collection.find({}, {
         _id: 0
-    }).toArray(function(err, docs) {
+    }).limit(10).sort({when: -1}).toArray(function(err, docs) {
         if (err) throw err;
 
         res.send(JSON.stringify(docs));
     });
+});
+
+app.get('/', function(req, res) {
+    
+    var response = 'Search for images: ' + appUrl + 'lolcats%20funny?offset=10' + ' ... ' +
+                    'Recent search queries: ' + appUrl + 'api/latest/imagesearch';
+    
+    res.send(response);
 });
