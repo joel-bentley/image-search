@@ -57,13 +57,27 @@ app.get('/api/imagesearch/:term', function(req, res) {
 
     collection.insertOne(searchData, function(err, result) {
         if (err) throw err;
+
+        collection.find({}).sort({
+            when: -1
+        }).skip(10).toArray(function(err, docs) {
+            docs.forEach(function(obj) {
+                collection.deleteOne({
+                    when: obj.when
+                }, function(err, r) {
+                    if (err) throw err;
+                });
+            });
+        });
     });
 });
 
 app.get('/api/latest/imagesearch', function(req, res) {
     collection.find({}, {
         _id: 0
-    }).limit(10).sort({when: -1}).toArray(function(err, docs) {
+    }).limit(10).sort({
+        when: -1
+    }).toArray(function(err, docs) {
         if (err) throw err;
 
         res.json(docs);
@@ -71,6 +85,8 @@ app.get('/api/latest/imagesearch', function(req, res) {
 });
 
 app.get('/', function(req, res) {
-    
-    res.render('index', { appUrl });
+
+    res.render('index', {
+        appUrl
+    });
 });
