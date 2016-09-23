@@ -3,10 +3,8 @@ var app = express();
 app.set('views', './views');
 app.set('view engine', 'pug');
 
-var msAccKey = process.env.MS_ACC_KEY;
-
 var Bing = require('node-bing-api')({
-    accKey: msAccKey
+    accKey: process.env.MS_ACC_KEY
 });
 
 var port = process.env.PORT || 8080;
