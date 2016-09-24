@@ -47,7 +47,9 @@ app.get('/api/imagesearch/:term', function(req, res) {
             };
         });
 
-        res.json(results);
+        res.json({
+            results
+        });
     });
 
     var searchData = {
@@ -77,10 +79,12 @@ app.get('/api/latest/imagesearch', function(req, res) {
         _id: 0
     }).limit(10).sort({
         when: -1
-    }).toArray(function(err, docs) {
+    }).toArray(function(err, searches) {
         if (err) throw err;
 
-        res.json(docs);
+        res.json({
+            searches
+        });
     });
 });
 
